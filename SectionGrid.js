@@ -16,11 +16,7 @@ class SectionGrid extends Component {
     // Calculate total dimensions and set to state
     let totalDimension = staticDimension;
     if (!staticDimension) {
-      totalDimension = Dimensions.get('window').width;
-    }
-
-    if (maxDimension && totalDimension > maxDimension) {
-      totalDimension = maxDimension;
+      totalDimension = maxDimension || Dimensions.get('window').width;
     }
 
     this.state = {

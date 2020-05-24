@@ -20,11 +20,7 @@ class FlatGrid extends React.Component {
 
     if (!staticDimension) {
       const dimension = horizontal ? 'height' : 'width';
-      totalDimension = Dimensions.get('window')[dimension];
-    }
-
-    if (maxDimension && totalDimension > maxDimension) {
-      totalDimension = maxDimension;
+      totalDimension = maxDimension || Dimensions.get('window')[dimension];
     }
 
     this.state = {
