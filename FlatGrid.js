@@ -13,7 +13,7 @@ class FlatGrid extends React.Component {
     this.renderRow = this.renderRow.bind(this);
     this.onLayout = this.onLayout.bind(this);
 
-    const { staticDimension, horizontal } = props;
+    const { staticDimension, maxDimension, horizontal } = props;
 
     // Calculate total dimensions and set to state
     let totalDimension = staticDimension;
@@ -23,18 +23,28 @@ class FlatGrid extends React.Component {
       totalDimension = Dimensions.get('window')[dimension];
     }
 
+    if (maxDimension && totalDimension > maxDimension) {
+      totalDimension = maxDimension;
+    }
+
     this.state = {
       totalDimension,
     };
   }
 
   onLayout(e) {
-    const { staticDimension, horizontal, onLayout } = this.props;
+    const {
+      staticDimension, maxDimension, horizontal, onLayout,
+    } = this.props;
     const { totalDimension } = this.state;
 
     if (!staticDimension) {
       const { width, height } = e.nativeEvent.layout || {};
-      const newTotalDimension = horizontal ? height : width;
+      let newTotalDimension = horizontal ? height : width;
+
+      if (maxDimension && newTotalDimension > maxDimension) {
+        newTotalDimension = maxDimension;
+      }
 
       if (totalDimension !== newTotalDimension) {
         this.setState({
@@ -148,12 +158,9 @@ class FlatGrid extends React.Component {
         onLayout={this.onLayout}
         keyExtractor={(rowItems, index) => {
           if (keyExtractor) {
-            return rowItems.map((rowItem, rowItemIndex) => {
-              return keyExtractor(rowItem, rowItemIndex)
-            }).join('_')
-          } else {
-            return `row_${index}`
+            return rowItems.map((rowItem, rowItemIndex) => keyExtractor(rowItem, rowItemIndex)).join('_');
           }
+          return `row_${index}`;
         }}
         {...restProps}
         horizontal={horizontal}

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {
-  View, Dimensions, ViewPropTypes, SectionList
+  View, Dimensions, ViewPropTypes, SectionList,
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { generateStyles, calculateDimensions, chunkArray } from './utils';
@@ -11,12 +11,16 @@ class SectionGrid extends Component {
     this.onLayout = this.onLayout.bind(this);
     this.renderRow = this.renderRow.bind(this);
 
-    const { staticDimension } = props;
+    const { staticDimension, maxDimension } = props;
 
     // Calculate total dimensions and set to state
     let totalDimension = staticDimension;
     if (!staticDimension) {
       totalDimension = Dimensions.get('window').width;
+    }
+
+    if (maxDimension && totalDimension > maxDimension) {
+      totalDimension = maxDimension;
     }
 
     this.state = {
@@ -25,11 +29,15 @@ class SectionGrid extends Component {
   }
 
   onLayout(e) {
-    const { staticDimension, onLayout } = this.props;
+    const { staticDimension, maxDimension, onLayout } = this.props;
     const { totalDimension } = this.state;
 
     if (!staticDimension) {
-      const { width: newTotalDimension } = e.nativeEvent.layout || {};
+      let { width: newTotalDimension } = e.nativeEvent.layout || {};
+
+      if (maxDimension && newTotalDimension > maxDimension) {
+        newTotalDimension = maxDimension;
+      }
 
       if (totalDimension !== newTotalDimension) {
         this.setState({
@@ -142,12 +150,9 @@ class SectionGrid extends Component {
         sections={groupedSections}
         keyExtractor={(rowItems, index) => {
           if (keyExtractor) {
-            return rowItems.map((rowItem, rowItemIndex) => {
-              return keyExtractor(rowItem, rowItemIndex)
-            }).join('_')
-          } else {
-            return `row_${index}`
+            return rowItems.map((rowItem, rowItemIndex) => keyExtractor(rowItem, rowItemIndex)).join('_');
           }
+          return `row_${index}`;
         }}
         style={style}
         onLayout={this.onLayout}
